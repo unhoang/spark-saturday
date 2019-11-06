@@ -1,7 +1,8 @@
 import mlflow
 import mlflow.sklearn
 import mlflow.pyfunc
-from lab_utils import load_data
+from sklearn.preprocessing import StandardScaler
+from lab_utils import Utils
 
 class MLflowOps():
     """
@@ -33,19 +34,21 @@ class MLflowOps():
 if __name__ == '__main__':
 
     mclnt = MLflowOps()
-    dataset = load_data("data/test_petrol_consumption.csv")
+    dataset = Utils.load_data("data/test_petrol_consumption.csv")
     # get all rows and columns but the last column
     X_test = dataset.iloc[:, 0:4].values
     # get all values only from the last columns, which is what we want to predict
     y_test = dataset.iloc[:, 4].values
     print("Observed values {}".format(y_test))
+    sc = StandardScaler()
+    X_test = sc.fit_transform(X_test)
     print("-" * 100)
     #
     # TODO in Lab
     # Add your run_uids from Lab-1 Runs. <cut-and-past in the list>
     # Can you try Lab-1 runs with model `random-forest-class-mode`, our classification model
     # and use its respective run_uids and test data
-    for run_id in ['f232d9435e0a4cd6847ec0cef946ae69', '4a355562b2434cb88f0b2474cffd5057']:
+    for run_id in ['6238ccf85a8e418d8017ff26fdae9452']:
         uri = "runs:/" + run_id + "/random-forest-reg-model"
         sk_model = mclnt.get_model("sklearn")(uri)
         print("Using Sckit-Learn Model Prediction:{}".format(type(sk_model)))

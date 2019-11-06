@@ -37,7 +37,7 @@ from sklearn import metrics
 from  mlflow.tracking import MlflowClient
 
 from airbnb_base_lab_3 import RFRBaseModel
-from lab_utils import load_data, plot_residual_graphs,get_temporary_directory_path
+from lab_utils import Utils
 
 
 class RFFExperimentModel(RFRBaseModel):
@@ -50,7 +50,7 @@ class RFFExperimentModel(RFRBaseModel):
         :param params: parameters for the RandomForestRegressor instance
         :return: None
         """
-        RFRBaseModel.__init__(self, params)
+        super(RFRBaseModel, self).__init__(params)
 
     def mlflow_run(self, df, r_name="Lab-4:RF Experiment Model"):
         """
@@ -101,7 +101,7 @@ class RFFExperimentModel(RFRBaseModel):
                                       ).sort_values("Importance", ascending=False)
 
             # Log importance file as feature artifact
-            temp_file_name = get_temporary_directory_path("feature-importance-", ".csv")
+            temp_file_name = Utils.get_temporary_directory_path("feature-importance-", ".csv")
             temp_name = temp_file_name.name
             try:
                 importance.to_csv(temp_name, index=False)
@@ -111,10 +111,10 @@ class RFFExperimentModel(RFRBaseModel):
 
             # Create residual plots and image directory
             # Residuals R = observed value - predicted value
-            (plt, fig, ax) = plot_residual_graphs(predictions, y_test, "Predicted values for Price ($)","Residual" , "Residual Plot")
+            (plt, fig, ax) = Utils.plot_residual_graphs(predictions, y_test, "Predicted values for Price ($)","Residual" , "Residual Plot")
 
             # Log residuals images
-            temp_file_name = get_temporary_directory_path("residuals-", ".png")
+            temp_file_name = Utils.get_temporary_directory_path("residuals-", ".png")
             temp_name = temp_file_name.name
             try:
                 fig.savefig(temp_name)
@@ -147,11 +147,11 @@ if __name__ == '__main__':
         {"n_estimators": 200,"max_depth": 6, "random_state": 42}
     ]
     # load the data
-    dataset = load_data("data/airbnb-cleaned-mlflow.csv")
+    dataset = Utils.load_data("data/airbnb-cleaned-mlflow.csv")
 
     # run these experiments, each with its own instance of model with the supplied parameters.
     for params in params_list:
-        rfr = RFFExperimentModel(params)
+        rfr = RFFExperimentModel.new_instance(params)
         experiment = "Experiment with {} trees".format(params['n_estimators'])
         (experimentID, runID) = rfr.mlflow_run(dataset, experiment)
         print("MLflow Run completed with run_id {} and experiment_id {}".format(runID, experimentID))

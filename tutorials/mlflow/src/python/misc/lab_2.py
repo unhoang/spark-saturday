@@ -35,7 +35,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, precision_score
-from lab_utils import load_data, plot_graphs, get_temporary_directory_path, print_pandas_dataset, plot_confusion_matrix
+from lab_utils import Utils
 
 class RFCModel():
 
@@ -46,6 +46,10 @@ class RFCModel():
         """
         self.rf = RandomForestClassifier(**params)
         self.params = params
+
+    @classmethod
+    def new_instance(cls, params={}):
+        return cls(params)
 
     def model(self):
         """
@@ -120,10 +124,10 @@ class RFCModel():
             experimentID = run.info.experiment_id
 
             # create confusion matrix images
-            (plt, fig, ax) = plot_confusion_matrix(y_test, y_pred, y, title="Bank Note Classification Confusion Matrix")
+            (plt, fig, ax) = Utils.plot_confusion_matrix(y_test, y_pred, y, title="Bank Note Classification Confusion Matrix")
 
             # create temporary artifact file name and log artifact
-            temp_file_name = get_temporary_directory_path("confusion_matrix-", ".png")
+            temp_file_name = Utils.get_temporary_directory_path("confusion_matrix-", ".png")
             temp_name = temp_file_name.name
             try:
                 fig.savefig(temp_name)
@@ -154,8 +158,8 @@ class RFCModel():
 
 if __name__ == '__main__':
     # load and print dataset
-    dataset = load_data("data/bill_authentication.csv")
-    print_pandas_dataset(dataset)
+    dataset = Utils.load_data("data/bill_authentication.csv")
+    Utils.print_pandas_dataset(dataset)
     # iterate over several runs with different parameters
     # TODO in the Lab (change these parameters, n_estimators and random_state
     # with each iteration.
@@ -163,7 +167,7 @@ if __name__ == '__main__':
     # start with n=10, step by 10 up to X <=120
     for n in range(10, 120, 10):
         params = {"n_estimators": n, "random_state": 42}
-        rfr = RFCModel(params)
+        rfr = RFCModel.new_instance(params)
         (experimentID, runID) = rfr.mlflow_run(dataset)
         print("MLflow Run completed with run_id {} and experiment_id {}".format(runID, experimentID))
         print("-" * 100)

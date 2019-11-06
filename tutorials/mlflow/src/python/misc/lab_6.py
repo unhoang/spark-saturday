@@ -2,7 +2,9 @@ import mlflow
 import mlflow.sklearn
 import mlflow.pyfunc
 
-from lab_utils import load_data
+from lab_utils import Utils
+from sklearn.preprocessing import StandardScaler
+
 
 class MLflowOps():
     def __init__(self):
@@ -24,14 +26,16 @@ class MLflowOps():
 
 if __name__ == '__main__':
     mclnt = MLflowOps()
-    dataset = load_data("data/test_petrol_consumption.csv")
+    dataset = Utils.load_data("data/test_petrol_consumption.csv")
     # get all rows and columns but the last column
     X_test = dataset.iloc[:, 0:4].values
     # get all the last columns, which is what we want to predict
     y_test = dataset.iloc[:, 4].values
     print("Observed values {}".format(y_test))
+    sc = StandardScaler()
+    X_test = sc.fit_transform(X_test)
     # Insert your run_id here in the list
-    for run_id in ['c0c2010c793345dd80d88da5cac6cdcf']:
+    for run_id in ['c3acc1f495d74bae8c8d5f02766d9dd7']:
         uri = "runs:/" + run_id + "/random-forest-reg-model"
         sk_model = mclnt.get_model("sklearn")(uri)
         print("-" * 100)
